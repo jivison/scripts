@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Just a small script to make creating a custom command easier
+
+# $1 should be the path to the bash file
+# $2 should be overwrite-true or not
+
+filename="${1::-3}"
+
+if [ -z "$1" ]; then 
+	echo "Please run the command with a file name..."
+
+elif [ -e /bin/"$filename" ] && [ "$2" != "overwrite-true" ]; then
+
+	echo "Command already exists!"
+	echo "If you want to overwrite the existing command, run the command with overwrite-true after the file name"
+	echo "THIS COULD OVERRIDE DEFAULT SYSTEM COMMANDS!"
+
+elif [ "$1" == "--help" ] || [ "$1" == "-help" ]; then
+	echo
+	echo "=======  Help  ========="
+	echo
+	echo "Syntax:"
+	echo "crtex [filename] [overwrite permissions]"
+	echo
+	echo "Running filename with a /path/to/file won't work."
+	echo "If you want to overwrite an existing command (DANGEROUS), run 'overwrite-true' after the filename."
+	echo
+	echo "Flags:"
+	echo "--help, -help      ....................     Prints this screen"
+	echo
+
+elif [ -e /bin/"$filename" ] && [ "$2" == "overwrite-true"  ]; then
+
+	printf "Running chmod on the command\n"
+	sudo chmod +x $1
+
+	printf "\nCopying file to /bin without the .sh file extension\n"
+	sudo cp $1 /bin/$filename
+	printf "Done!\n"
+
+else
+
+	printf "Running chmod on the command\n"
+	sudo chmod +x $1
+
+	printf "\nCopying file to /bin without the .sh file extension\n"
+	sudo cp $1 /bin/$filename
+	printf "Done!\n"
+
+fi
+
+
