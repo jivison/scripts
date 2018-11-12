@@ -9,36 +9,57 @@ passed_args = sys.argv
 play = passed_args[1]
 args = passed_args[2:]
 
-def git(arguments):
-    path = subprocess.check_output("pwd", shell=True)
 
-    action = arguments[0]
+class Plays:
 
-    if action == "scp":
-        msg = arguments[1]
-        branch = arguments[2]
+    var = "test"
 
-        print("Running git.yaml with msg: {} | and branch: {}".format(msg, branch))
+    def __init__(self, play, input_args):
+        
+        getattr(self, play)(input_args)
 
-        os.system("ansible-playbook --extra-vars=\"msg={} branch={} repo_path={}\" ~/.playbooks/git.yaml -f 10".format(msg, branch, path))
+    def git(self, arguments):
+        path = subprocess.check_output("pwd", shell=True)
 
-    elif action == "test":
-        print("Yup, this works!")
+        action = arguments[0]
 
-    elif action == "clone":
+        if action == "scp":
+            msg = arguments[1]
+            branch = arguments[2]
 
-        user = arguments[1]
-        repo = arguments[2]
+            print("Running git.yaml with msg: {} | and branch: {}".format(msg, branch))
 
-        os.system("git clone https://github.com/{}/{}.git".format(user, repo))
+            os.system("ansible-playbook --extra-vars=\"msg={} branch={} repo_path={}\" ~/.playbooks/git.yaml -f 10".format(msg, branch, path))
 
-    else:
-        print("Please enter an action")
+        elif action == "test":
+            print("Yup, this command works!")
 
-plays = {
-    'git': git(args),
-}
+        elif action == "clone":
+
+            user = arguments[1]
+            repo = arguments[2]
+
+            os.system("git clone https://github.com/{}/{}.git".format(user, repo))
+
+        else:
+            print("Please enter an action")
+
+    def genhosts(self, arguments):
+        
+        try:
+            default_genfile = arguments[0]
+            if default_genfile == 'false':
+
+                genfile = arguments[1] 
+
+                print("Generating from file: {}".format(genfile))
+                os.system("ansible-playbook ~/.playbooks/genhosts.yaml -e '@{}}' -f 10".format(genfile))
+
+        except IndexError:
+            print("Generating from default configuration...")
+            os.system("ansible-playbook ~/.playbooks/genhosts.yaml -e '@~/.playbooks/vars/genhosts_vars.yaml'")
+        
+        
 
 
-if __name__ == 'main':
-    plays[play]    
+go = Plays(play, args)    
