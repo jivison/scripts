@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import 
 import sys
 import os
 import subprocess
@@ -24,7 +25,7 @@ class Plays:
         action = arguments[0]
 
         if action == "scp":
-            msg = arguments[1]
+            msg = "'" + arguments[1] + "'"
             branch = arguments[2]
 
             print("Running git.yaml with msg: {} | and branch: {}".format(msg, branch))
@@ -47,19 +48,14 @@ class Plays:
     def genhosts(self, arguments):
         
         try:
-            default_genfile = arguments[0]
-            if default_genfile == 'false':
 
-                genfile = arguments[1] 
+            genfile = arguments[0]         
 
-                print("Generating from file: {}".format(genfile))
-                os.system("ansible-playbook ~/.playbooks/genhosts.yaml -e '@{}}' -f 10".format(genfile))
+            print("Generating from file: {}".format(genfile))
+            os.system("ansible-playbook ~/.playbooks/genhosts.yaml -e '@{}' -f 10".format(genfile))
 
         except IndexError:
             print("Generating from default configuration...")
             os.system("ansible-playbook ~/.playbooks/genhosts.yaml -e '@~/.playbooks/vars/genhosts_vars.yaml'")
-        
-        
-
 
 go = Plays(play, args)    
