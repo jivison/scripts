@@ -1,0 +1,25 @@
+#! /bin/zsh
+
+
+Iterate () {
+    files=$(ls $1 | wc -l)
+    if [[ $files != 0 ]]; then
+        for filename in "$1"/*; do
+            
+            filestats=$(file $filename)
+            filetype="${filestats#*\:}"
+
+            if [[ "$filetype" = " directory" ]]; then
+                Iterate "$filename"
+            else
+                filecount=$(($filecount + 1))
+                echo "${filename##*\/}"
+            
+            fi
+        done    
+    fi
+    
+}
+
+Iterate ~/STEM
+
