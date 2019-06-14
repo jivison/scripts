@@ -69,7 +69,7 @@ class Plays:
                 branch = arguments[2]
             except Exception:
                 branch = "master"
-                print("**Warning, pushing to master**\nPress enter to confirm...")
+                print("\n**Warning, pushing to master**\nPress enter to confirm...")
                 input()
 
             print("Gitting with msg: {} | and branch: {}".format(msg, branch))
@@ -77,8 +77,7 @@ class Plays:
             os.system("git add --all")
             os.system(f"git commit -am {msg}")
             os.system(f"git push origin {branch}")
-            
-            # os.system("ansible-playbook --extra-vars=\"msg={} branch={} repo_path={}\" ~/.playbooks/git.yaml -f 10".format(msg, branch, path))
+
 
         elif scene == "test":
             print("Yup, this command works!")
