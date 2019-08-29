@@ -1,0 +1,11 @@
+{
+  "name": "todocli",
+  "version": "0.0.1",
+  "description": "A todo app in the command line",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "John Ivison",
+  "license": "MIT"
+}

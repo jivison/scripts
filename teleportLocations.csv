@@ -2,4 +2,10 @@ alias,path
 scripts, /home/john/scripts
 codecore, /home/john/codecore
 home, /home/john
-today,/home/john/codecore/week3/day5
+projects, /home/john/codecore/projects
+practice, /home/john/practice/node
+cca, /home/john/codecore-assignments
+website, /home/john/projects/Personal-Website
+q, /home/john/quizzes
+today, /home/john/codecore/week5/day2
+e-ruby,/home/john/exercism/ruby
