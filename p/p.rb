@@ -21,15 +21,80 @@ class SpecialPrint
     end
 
     def print(*args)
-        method = args[0]
-        self.send(method, *args[1..-1])
+        methods = args[0].split(",")
+        methods.reduce(args[1]) { |string, method| self.send(method, string) }
+    end
+
+    def help(args)
+        '
+p (ruby script) - a command line print program
+==============================================
+
+p method[,method1,method2] message which can be many words
+
+VISUAL METHODS:
+
+        black
+        red
+        green
+        yellow
+        blue
+        magenta
+        cyan
+        white {message} ............ Prints message in that colour
+
+        rainbow {message} .......... Prints a message in rainbow colours
+
+        upcase {message} ........... Prints a message in uppercase
+
+        downcase {message} ......... Prints a message in lowercase
+
+        ascend {message} ........... Print a message in capitals with spaces between each letter
+
+        lower_ascend {message} ..... Print a message in lowercase with spaces between each letter
+
+        mocking {message} .......... Prints a message tHaT mOcKs YoU
+
+UTILITY METHODS:
+
+        stringify .................. Converts text to a string that can be used in your favourite programming language
+        '
     end
 
     def rainbow(msg)
         rainbow_colours = [:red, :yellow, :green, :blue, :cyan, :magenta]
-        return msg.split("").each_with_index.inject("") { |acc, (element, index)|
+        msg.split("").each_with_index.inject("") { |acc, (element, index)|
             acc += (element == " ") ? " " : self.send(rainbow_colours[index % 6], element)
         }
+    end
+
+    def stringify(msg)
+        p msg
+        "^^ string above ^^"
+    end
+
+    def ascend(msg)
+        msg.split("").inject("") { |final_string, char| final_string += char.upcase + " " }
+    end
+
+    def lower_ascend(msg)
+        msg.split("").inject("") { |final_string, char| final_string += char.downcase + " " }
+    end
+
+    def mocking(msg)
+        offset = 0
+        msg.split("").each_with_index.inject("") { |final_string, (char, index)|
+            offset += 1 if char == " "
+            final_string += (((index + offset).odd?) ? char.upcase : char.downcase )
+        }
+    end
+
+    def downcase(msg)
+        msg.downcase
+    end
+
+    def upcase(msg)
+        msg.upcase
     end
 
 end
