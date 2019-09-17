@@ -2,10 +2,15 @@ alias,path
 scripts, /home/john/scripts
 codecore, /home/john/codecore
 home, /home/john
-projects, /home/john/codecore/projects
 practice, /home/john/practice/node
 cca, /home/john/codecore-assignments
 website, /home/john/projects/Personal-Website
 q, /home/john/quizzes
 e-ruby, /home/john/exercism/ruby
-today,/home/john/codecore/week5/day5
+projects, /home/john/projects
+amazon, /home/john/codecore/week5/Amazon
+todat, /home/john/codecore/week6/day1
+today, /home/john/codecore/week6/day4
+mino, /home/john/projects/mino/my-app
+awesome_answers, /home/john/clones/haml_answers
+newlangs,/home/john/projects/new_langs
