@@ -11,6 +11,8 @@ local $SIG{INT} = sub {
 
 my %sources = ("Korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0');
 
+sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+
 sub update_sources {
 
     my $key = undef;
@@ -47,7 +49,7 @@ sub generate_words {
 sub ask_question {
     my @words = generate_words;
     my $current_word = $words[rand @words];
-    my $translation = $current_word->{"translation"} =~ s/\"//r;
+    my $translation = trim($current_word->{"translation"} =~ s/\"//r);
     print $current_word->{"language"} ."\t". $current_word->{"word"} . ": ";
     my $user_input = <STDIN>;
     chomp $user_input;
@@ -61,14 +63,25 @@ sub ask_question {
 
 sub run {
     my $number_of_words = $ARGV[0] || 1;
+    if ($number_of_words eq "endless") {
+        my $endlessindex = 0;
+        while (1) {
+            $endlessindex++;
+            print("\n", $endlessindex, ". ");
+            ask_question();
+            print "Press enter to see the next word...";
+            <STDIN>;
+        }
+    } else {
+        for my $index (1..$number_of_words) {
+            print("\n", $index, ". ");
+            
+            ask_question();
+            print $index eq $number_of_words ? "Press enter to end the game..." : "Press enter to see the next word...";
+            <STDIN>;
+        }   
+    }
 
-    for my $index (1..$number_of_words) {
-        print("\n", $index, ". ");
-        
-        ask_question();
-        print $index eq $number_of_words ? "Press enter to end the game..." : "Press enter to see the next word...";
-        <STDIN>;
-    }   
 }
 
 update_sources if $ARGV[1] eq "update";
