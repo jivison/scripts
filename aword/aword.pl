@@ -2,6 +2,7 @@
 use strict;
 # use warnings;
 use LWP::Simple;
+use List::Util qw(shuffle);
 
 # This runs on keyboard interrupt
 local $SIG{INT} = sub {
@@ -48,16 +49,22 @@ sub generate_words {
 
 sub ask_question {
     my @words = generate_words;
+    
     my $current_word = $words[rand @words];
+
     my $translation = trim($current_word->{"translation"} =~ s/\"//r);
-    print $current_word->{"language"} ."\t". $current_word->{"word"} . ": ";
+    my $source = trim($current_word->{"word"} =~ s/\"//r);
+
+    my ($demand, $expected) = shuffle(($translation, $source));
+
+    print $current_word->{"language"} ."\t". $demand . ": ";
     my $user_input = <STDIN>;
     chomp $user_input;
     
-    if (lc $user_input eq lc $translation) {
+    if (lc $user_input eq lc $expected) {
         print "\nCorrect!\n";
     } else {
-        print "I was expecting '$translation'\nBetter luck next time!\n";
+        print "I was expecting '$expected'\nBetter luck next time!\n";
     }
 }
 
