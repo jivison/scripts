@@ -6,13 +6,50 @@ use List::Util qw(shuffle);
 
 # This runs on keyboard interrupt
 local $SIG{INT} = sub {
-    print "\nGoodbye!";
+    my @goodbyes = ("Goodbye!", "안녕!", "Salut!", "Tchüss!", "Прощай!");
+    print "\n$goodbyes[ rand @goodbyes ]";
     exit 130;
 };
 
-my %sources = ("Korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0');
+my %sources = (
+    "Korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
+    );
 
-sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+my %options = (
+    "-c" => 1,
+    "update" => "false",
+    "-prompt" => "english"
+);
+
+my @unnamed_options = (
+    "update"
+);
+
+
+sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+
+sub print_help {
+    my $help = <<EOF;
+aword perl
+==========
+
+A word is a small Perl script to prompt for the user to translate a random word. It pulls from csv files for sources.
+The first column is assumed to be the foreign word, while the second is assumed to be the english translation.
+
+Usage:
+    aword [options...]
+
+Options:
+
+    -c <count>            The number of words the program asks you. Can be either a postive integer or "endless" (default: 1)
+    -prompt <prompt>      The language that is prompted. Can be "random", "english", or "foreign". (default: "random")
+
+    update                Forces an a redownload of all the sources.
+
+EOF
+
+    print($help);
+}
 
 sub update_sources {
 
@@ -55,7 +92,15 @@ sub ask_question {
     my $translation = trim($current_word->{"translation"} =~ s/\"//r);
     my $source = trim($current_word->{"word"} =~ s/\"//r);
 
-    my ($demand, $expected) = shuffle(($translation, $source));
+    my ($demand, $expected);
+
+    if ($options{"-prompt"} eq "random") {
+        ($demand, $expected) = shuffle(($translation, $source));
+    } elsif ($options{"-prompt"} eq "english") {
+        ($demand, $expected) = ($translation, $source);
+    } else {
+        ($demand, $expected) = ($source, $translation);
+    }
 
     print $current_word->{"language"} ."\t". $demand . ": ";
     my $user_input = <STDIN>;
@@ -68,8 +113,48 @@ sub ask_question {
     }
 }
 
+sub parse_options {
+
+    my $option_type; 
+    my $option_name;
+
+    if (index(join(" ", @ARGV), "-help") != -1) {
+        print_help();
+        exit;
+    }
+
+    for my $arg (@ARGV) {
+
+        if ($option_type eq "param_required") {
+            $options{$option_name} = $arg;
+            $option_type = undef;
+        } elsif (rindex($arg, "-", 0) != -1) {
+            $option_type = "param_required";
+            $option_name = $arg;
+
+            if (index(join(" ", keys %options), $option_name) == -1) {
+                print("WARNING: option '$option_name' isn't recognized, it and its value will be ignored\n");
+            }
+
+        } else {
+            $option_name = $arg;
+            if (index(join(" ", keys @unnamed_options), $option_name) == -1) {
+                print("WARNING: option '$option_name' isn't recognized, it will be ignored\n");
+            }
+            if ($option_name eq "update") {$options{"update"} = "true" }
+        }
+    }
+
+}
+
+sub setup {
+    parse_options();
+    update_sources if $options{"update"} eq "true";
+}
+
 sub run {
-    my $number_of_words = $ARGV[0] || 1;
+    # -c for count
+    my $number_of_words = $options{"-c"};
     if ($number_of_words eq "endless") {
         my $endlessindex = 0;
         while (1) {
@@ -91,7 +176,7 @@ sub run {
 
 }
 
-update_sources if $ARGV[1] eq "update";
 
+setup();
 run();
 

@@ -4,8 +4,11 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-ask_question	aword.pl	50;"	s
-generate_words	aword.pl	30;"	s
-run	aword.pl	71;"	s
-trim	aword.pl	15;"	s
-update_sources	aword.pl	17;"	s
+ask_question	aword.pl	87;"	s
+generate_words	aword.pl	67;"	s
+parse_options	aword.pl	116;"	s
+print_help	aword.pl	31;"	s
+run	aword.pl	155;"	s
+setup	aword.pl	150;"	s
+trim	aword.pl	29;"	s
+update_sources	aword.pl	54;"	s
