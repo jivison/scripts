@@ -16,3 +16,4 @@ From the help command:
         -prompt <prompt>      The language that is prompted. Can be "random", "english", or "foreign". (default: "random")
 
         update                Forces an a redownload of all the sources.
+        uncolored             Removes colour from the program

@@ -3,28 +3,36 @@ use strict;
 # use warnings;
 use LWP::Simple;
 use List::Util qw(shuffle);
+use Term::ANSIColor;
+
+sub goodbye {
+    my @goodbyes = ("Goodbye!", "안녕!", "Salut!", "Tchüss!", "Прощай!");
+    print "\n$goodbyes[ rand @goodbyes ]";
+}
 
 # This runs on keyboard interrupt
 local $SIG{INT} = sub {
-    my @goodbyes = ("Goodbye!", "안녕!", "Salut!", "Tchüss!", "Прощай!");
-    print "\n$goodbyes[ rand @goodbyes ]";
+    goodbye();
     exit 130;
 };
 
 my %sources = (
-    "Korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
+    "korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
     );
 
 my %options = (
     "-c" => 1,
     "update" => "false",
-    "-prompt" => "english"
+    "-prompt" => "english",
+    "-lang" => undef
 );
 
 my @unnamed_options = (
-    "update"
+    "update",
+    "uncolored"
 );
 
+my $colored = 1;
 
 sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 
@@ -73,12 +81,20 @@ sub generate_words {
             chomp $line;
 
             my @fields = split ",", $line;
-            
+
+
+            if ($options{"-lang"} && index(join(" ", keys %sources), $options{"-lang"})) {
+                print color("yellow");
+                print "That is not a valid language!";
+                print color("reset");
+                exit 130; 
+            }
+
             push(@all_words, {
                 "language" => $key,
                 "word" => $fields[0],
                 "translation" => $fields[1]
-            });
+            }) unless $options{"-lang"} && $key ne $options{"-lang"} ;
         }
     }
     return @all_words;
@@ -107,9 +123,14 @@ sub ask_question {
     chomp $user_input;
     
     if (lc $user_input eq lc $expected) {
+        print color("green") if $colored == 1;
         print "\nCorrect!\n";
+        print color("reset");
     } else {
-        print "I was expecting '$expected'\nBetter luck next time!\n";
+        print color("red") if $colored == 1;
+        print "I was expecting '$expected'\n";
+        print color("reset");
+        print "Better luck next time!\n";
     }
 }
 
@@ -133,15 +154,20 @@ sub parse_options {
             $option_name = $arg;
 
             if (index(join(" ", keys %options), $option_name) == -1) {
-                print("WARNING: option '$option_name' isn't recognized, it and its value will be ignored\n");
+                print color("yellow") if $colored == 1;
+                print("WARNING: named option '$option_name' isn't recognized, it and its value will be ignored\n");
+                print color("reset");
             }
 
         } else {
             $option_name = $arg;
-            if (index(join(" ", keys @unnamed_options), $option_name) == -1) {
+            if (index(join(" ", @unnamed_options), $option_name) == -1) {
+                print color("yellow") if $colored == 1;
                 print("WARNING: option '$option_name' isn't recognized, it will be ignored\n");
+                print color("reset");
             }
             if ($option_name eq "update") {$options{"update"} = "true" }
+            elsif ($option_name eq "uncolored") {$colored = 0}
         }
     }
 
@@ -173,7 +199,7 @@ sub run {
             <STDIN>;
         }   
     }
-
+    goodbye();
 }
 
 
