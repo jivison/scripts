@@ -1,4 +1,5 @@
 #! /home/john/.rvm/rubies/ruby-2.6.3/bin/ruby
+#$ {"name": "p", "language": "ruby", "description": "A command line print wrapper"}
 
 class SpecialPrint    
     def initialize()

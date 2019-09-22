@@ -1,4 +1,5 @@
 #!/bin/zsh
+#$ {"name": "crtex", "language": "shell", "description": "Creates a command from a file"}
 
 # Just a small script to make creating a custom command easier
 

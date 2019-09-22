@@ -1,4 +1,5 @@
 #! /bin/python3
+#$ {"name": "getImageHelper", "language": "Python", "description": "Some helper functions for getImage"}
 
 import sys
 import os

@@ -1,3 +1,5 @@
+//$ {"name": "fryImage", "language": "js", "description": "Fries an image (broken)"}
+
 // const qrcode = require("qrcode");
 const jimp = require("jimp");
 

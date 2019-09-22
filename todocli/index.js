@@ -1,3 +1,4 @@
+//$ {"name": "todo", "language": "js", "description": "A command line todo client"}
 // Project criteria:
 // http://codecore.certified.in/learning_modules/todo-cli-week-3-8/submissions
 

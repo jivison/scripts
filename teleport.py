@@ -1,4 +1,5 @@
 #! /bin/python3
+#$ {"name": "teleport", "language": "python", "description": "Helps you jump around the system"}
 
 import sys
 import os

@@ -1,4 +1,5 @@
 #! /bin/python3
+#$ {"name": "getImage", "language": "Python", "description": "Gets a random image from a series of images"}
 
 import csv
 import random

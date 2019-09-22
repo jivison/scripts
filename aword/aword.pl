@@ -1,20 +1,10 @@
 #!/usr/bin/perl
+#$ {"name": "aword", "language": "perl", "description": "Prompts the user with a series of words in foreign languages"}
 use strict;
 # use warnings;
 use LWP::Simple;
 use List::Util qw(shuffle);
 use Term::ANSIColor;
-
-sub goodbye {
-    my @goodbyes = ("Goodbye!", "안녕!", "Salut!", "Tchüss!", "Прощай!");
-    print "\n$goodbyes[ rand @goodbyes ]";
-}
-
-# This runs on keyboard interrupt
-local $SIG{INT} = sub {
-    goodbye();
-    exit 130;
-};
 
 my %sources = (
     "korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
@@ -23,7 +13,7 @@ my %sources = (
 my %options = (
     "-c" => 1,
     "update" => "false",
-    "-prompt" => "english",
+    "-prompt" => "random",
     "-lang" => undef
 );
 
@@ -33,6 +23,29 @@ my @unnamed_options = (
 );
 
 my $colored = 1;
+my $global_count = 0;
+my $start_time = time;
+my $history_path = "/home/john/scripts/aword/.aword_history";
+
+sub write_history {
+    my $play_time = time - $start_time;
+    open(my $history, ">>", $history_path) or print("WARNING: history file could not be opened (at $history_path)");
+    say $history "$global_count,$options{'-prompt'},$start_time,$play_time";
+}
+
+sub setdown {
+    write_history();
+
+    my @goodbyes = ("Goodbye!", "안녕!", "Salut!", "Tchüss!", "Прощай!");
+    print "\n$goodbyes[ rand @goodbyes ]";
+}
+
+# This runs on keyboard interrupt
+local $SIG{INT} = sub {
+    write_history() unless $global_count == 0;
+    exit 130;
+};
+
 
 sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 
@@ -53,6 +66,12 @@ Options:
     -prompt <prompt>      The language that is prompted. Can be "random", "english", or "foreign". (default: "random")
 
     update                Forces an a redownload of all the sources.
+    uncolored             Removes colour from the program
+
+Commands:
+
+    -help                 Prints this screen
+    -stats                Prints some stats about your playtime
 
 EOF
 
@@ -122,6 +141,8 @@ sub ask_question {
     my $user_input = <STDIN>;
     chomp $user_input;
     
+    $global_count++;
+
     if (lc $user_input eq lc $expected) {
         print color("green") if $colored == 1;
         print "\nCorrect!\n";
@@ -139,10 +160,16 @@ sub parse_options {
     my $option_type; 
     my $option_name;
 
-    if (index(join(" ", @ARGV), "-help") != -1) {
+    my $string_opts = join(" ", @ARGV);
+
+    if (index($string_opts, "-help") != -1) {
         print_help();
         exit;
+    } elsif (index($string_opts, "-stats") != -1) {
+        system("perl /home/john/scripts/aword/awordstats.pl");
+        exit;
     }
+    
 
     for my $arg (@ARGV) {
 
@@ -199,10 +226,9 @@ sub run {
             <STDIN>;
         }   
     }
-    goodbye();
 }
 
 
 setup();
 run();
-
+setdown();

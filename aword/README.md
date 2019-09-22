@@ -5,7 +5,8 @@ From the help command:
     aword perl
     ==========
 
-    A word is a small Perl script to prompt for the user to translate a random word. It pulls from csv files for sources. The first column is assumed to be the foreign word, while the second is assumed to be the english translation.
+    A word is a small Perl script to prompt for the user to translate a random word. It pulls from csv files for sources.
+    The first column is assumed to be the foreign word, while the second is assumed to be the english translation.
 
     Usage:
         aword [options...]
