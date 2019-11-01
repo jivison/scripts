@@ -25,7 +25,7 @@ while (my $line = <$history>) {
     $stats{"count"} += 1;
     $stats{"total_playtime"} += $fields[3];
     $stats{"total_answered"} += $fields[0];
-    $prompt_count{$fields[1]} and $prompt_count{$fields[1]} += 1 or $prompt_count{$fields[1]} = 1;
+    $prompt_count{$fields[1]} and $prompt_count{$fields[1]} += $fields[0] or $prompt_count{$fields[1]} = $fields[0];
 
 }
 
@@ -33,4 +33,4 @@ while (my $line = <$history>) {
 print("You've played " . color('bold blue') . $stats{'count'} . color('reset') . " games so far...\n");
 print("for a total of " . color('bold red') . $stats{'total_playtime'} . color('reset') . " seconds...\n");
 print("and answered " . color('bold yellow') . $stats{'total_answered'} . color('reset') . " questions... \n");
-print("with your favourite prompt of " . color('bold') . favourite_prompt . color('reset') . "!\n");
+print("with your favourite prompt of " . color('bold magenta') . favourite_prompt . color('reset') . "!\n");

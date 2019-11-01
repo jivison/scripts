@@ -48,12 +48,12 @@ if command == "go":
     except AliasError:
         print(f"Alias '{alias}' not found!")
 
-elif command == "--set":
+elif command == "set":
     alias = args[1]
 
     writeCSV(alias, os.popen('pwd').read())
 
-elif command == "--list":
+elif command == "list":
     with open(filepath, "r") as locations:
         reader = csv.DictReader(locations)
 
@@ -62,3 +62,9 @@ elif command == "--list":
         for line in reader:
             print(f"{count}) {line['alias'].strip()}{' ' * (15 - len(line['alias'].strip()))} ⁓ {10 * ' '}{line['path']}")
             count += 1
+
+elif command == "edit":
+    print(filepath)
+
+else:
+    print("teleport: Command not found!")

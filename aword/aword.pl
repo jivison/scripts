@@ -70,8 +70,8 @@ Options:
 
 Commands:
 
-    !help,-help           Prints this screen
-    !stats                Prints some stats about your playtime
+    \@help,-help           Prints this screen
+    \@stats                Prints some stats about your playtime
 
 EOF
 
@@ -85,7 +85,7 @@ sub update_sources {
     foreach $key (keys %sources) {
         
         my $source = $sources{$key};
-        print "Downloading source '$key'\n"use warnings;;
+        print "Downloading source '$key'\n";
         die "A non 200 status code was returned!" unless getstore($source, "/home/john/scripts/aword/$key\_words.csv") == 200;
     }
 
@@ -162,10 +162,10 @@ sub parse_options {
 
     my $string_opts = join(" ", @ARGV);
 
-    if (index($string_opts, "!help") != -1 || index($string_opts, "-help") != -1) {
+    if (index($string_opts, "\@help") != -1 || index($string_opts, "-help") != -1) {
         print_help();
         exit;
-    } elsif (index($string_opts, "!stats") != -1) {
+    } elsif (index($string_opts, "\@stats") != -1) {
         system("perl /home/john/scripts/aword/awordstats.pl");
         exit;
     }
