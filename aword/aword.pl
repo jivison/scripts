@@ -7,7 +7,7 @@ use List::Util qw(shuffle);
 use Term::ANSIColor;
 
 my %sources = (
-    "korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
+    # "korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
     );
 
 my %options = (
@@ -25,7 +25,20 @@ my @unnamed_options = (
 my $colored = 1;
 my $global_count = 0;
 my $start_time = time;
+
+my $sources_path = "/home/john/scripts/aword/.aword_sources";
 my $history_path = "/home/john/scripts/aword/.aword_history";
+
+open(my $sources_raw, "<", $sources_path) or print("WARNING: sources file could not be opened (at $sources_path)");
+
+while (my $line = <$sources_raw>) {
+    chomp $line;
+    my @fields = split ",", $line;
+
+    if ($fields[1] ne "source" ) {
+        $sources{$fields[0]} = $fields[1];
+    }
+}
 
 sub write_history {
     my $play_time = time - $start_time;
@@ -72,6 +85,9 @@ Commands:
 
     \@help,-help           Prints this screen
     \@stats                Prints some stats about your playtime
+    \@sources              Source control    
+        add <alias> <url>       Adds a source to the list of sources. Must be csv format.
+        list                    List the current sources
 
 EOF
 
@@ -86,7 +102,7 @@ sub update_sources {
         
         my $source = $sources{$key};
         print "Downloading source '$key'\n";
-        die "A non 200 status code was returned!" unless getstore($source, "/home/john/scripts/aword/$key\_words.csv") == 200;
+        die "A non 200 status code was returned!" unless getstore($source, "/home/john/scripts/aword/sources/$key\_words.csv") == 200;
     }
 
 }
@@ -94,28 +110,46 @@ sub update_sources {
 sub generate_words {
     my @all_words = ();
 
-    foreach my $key (keys %sources) {
-        open(my $current_data, "<", "/home/john/scripts/aword/$key\_words.csv") || die "Could not open file $key\_words.csv!";
+    if ($options{"-lang"}) {
+        my $key = $options{"-lang"};
+
+        if (!exists($sources{ $key })) {
+            print color("yellow");
+            print "Language $key could not be found!\n";
+            print color("reset");
+            exit 130;
+        }
+ 
+        open(my $current_data, "<", "/home/john/scripts/aword/sources/$key\_words.csv") || die "Could not open file $key\_words.csv!";
         while (my $line = <$current_data>) {
             chomp $line;
 
             my @fields = split ",", $line;
 
-
-            if ($options{"-lang"} && index(join(" ", keys %sources), $options{"-lang"})) {
-                print color("yellow");
-                print "That is not a valid language!";
-                print color("reset");
-                exit 130; 
-            }
-
             push(@all_words, {
                 "language" => $key,
                 "word" => $fields[0],
                 "translation" => $fields[1]
-            }) unless $options{"-lang"} && $key ne $options{"-lang"} ;
+            })
+        }
+
+    } else {
+        foreach my $key (keys %sources) {
+            open(my $current_data, "<", "/home/john/scripts/aword/sources/$key\_words.csv") || die "Could not open file $key\_words.csv!";
+            while (my $line = <$current_data>) {
+                chomp $line;
+
+                my @fields = split ",", $line;
+
+                push(@all_words, {
+                    "language" => $key,
+                    "word" => $fields[0],
+                    "translation" => $fields[1]
+                })
+            }
         }
     }
+
     return @all_words;
 }
 
@@ -167,6 +201,9 @@ sub parse_options {
         exit;
     } elsif (index($string_opts, "\@stats") != -1) {
         system("perl /home/john/scripts/aword/awordstats.pl");
+        exit;
+    } elsif (index($string_opts, "\@sources") != -1) {
+        system("perl /home/john/scripts/aword/awordsources.pl $string_opts");
         exit;
     }
     

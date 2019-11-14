@@ -18,3 +18,11 @@ From the help command:
 
         update                Forces an a redownload of all the sources.
         uncolored             Removes colour from the program
+
+    Commands:
+
+        \@help,-help           Prints this screen
+        \@stats                Prints some stats about your playtime
+        \@sources              Source control    
+            add <alias> <url>       Adds a source to the list of sources. Must be csv format.
+            list                    List the current sources
