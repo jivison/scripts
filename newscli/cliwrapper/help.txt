@@ -1,0 +1,10 @@
+GO NEWS HELP
+============
+
+find "<keyword>"                    Returns at most 10 news stories matching the given keyword
+read <num> [--term, --terminal]     Reads the given article in the browser. If the --term (or --terminal)
+                                        flag is present, it will display in the terminal
+list                                Prints out the most recent find
+
+--help
+help                                Prints this screen
