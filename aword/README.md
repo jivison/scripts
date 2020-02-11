@@ -11,10 +11,14 @@ From the help command:
     Usage:
         aword [options...]
 
+        During the program, type in a word and hit enter to submit a translation. Type '.quit' (on the prompt screen) or press ^C to
+        exit the program.
+
     Options:
 
         -c <count>            The number of words the program asks you. Can be either a postive integer or "endless" (default: 1)
         -prompt <prompt>      The language that is prompted. Can be "random", "english", or "foreign". (default: "random")
+        -lang <language>      Restricts aword to a single given language. Has to correspond with a source
 
         update                Forces an a redownload of all the sources.
         uncolored             Removes colour from the program
@@ -26,3 +30,5 @@ From the help command:
         \@sources              Source control    
             add <alias> <url>       Adds a source to the list of sources. Must be csv format.
             list                    List the current sources
+
+    EOF

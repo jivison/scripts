@@ -13,4 +13,10 @@ minoclient, /home/john/projects/mino-client
 documentbox, /home/john/projects/document_box
 scorekeeper, /home/john/projects/mysite/scorekeeper
 vibro, /home/john/lingua-vibro
-gameshelf, /home/john/projects/gameshelf-2.0
+news, /home/john/go/src/newscli
+random, /home/john/random
+gameshelf, /home/john/go/src/gameshelf
+downloads, /home/john/Downloads
+typing, /home/john/projects/custom-typing-practice
+minoplaylist, /home/john/projects/mino_playlist_tool
+sc,/home/john/go/src/shopping_cart

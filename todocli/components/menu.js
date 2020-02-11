@@ -24,7 +24,7 @@ function menu(options, commands, rlInterface) {
             ) ||
             answer.charAt(1) === "*"
         ) {
-            params.push(answer.charAt(1));
+            params.push(answer.split("").slice(1).join(""));
             answer = answer.charAt(0);
         }
 

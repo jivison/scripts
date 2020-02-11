@@ -7,6 +7,7 @@ use List::Util qw(shuffle);
 use Term::ANSIColor;
 
 my %sources = (
+    # Controlled by awordsources now
     # "korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
     );
 
@@ -47,7 +48,7 @@ sub write_history {
 }
 
 sub setdown {
-    write_history();
+    write_history() unless $global_count == 0;;
 
     my @goodbyes = ("Goodbye!", "안녕!", "Salut!", "Tchüss!", "Прощай!");
     print "\n$goodbyes[ rand @goodbyes ]";
@@ -55,7 +56,7 @@ sub setdown {
 
 # This runs on keyboard interrupt
 local $SIG{INT} = sub {
-    write_history() unless $global_count == 0;
+    setdown();
     exit 130;
 };
 
@@ -73,10 +74,14 @@ The first column is assumed to be the foreign word, while the second is assumed 
 Usage:
     aword [options...]
 
+    During the program, type in a word and hit enter to submit a translation. Type '.quit' (on the prompt screen) or press ^C to
+    exit the program.
+
 Options:
 
     -c <count>            The number of words the program asks you. Can be either a postive integer or "endless" (default: 1)
     -prompt <prompt>      The language that is prompted. Can be "random", "english", or "foreign". (default: "random")
+    -lang <language[,lang2]>      Restricts aword to a single given language. Has to correspond with a source
 
     update                Forces an a redownload of all the sources.
     uncolored             Removes colour from the program
@@ -107,13 +112,11 @@ sub update_sources {
 
 }
 
-sub generate_words {
+sub find_source {
+    my ($key) = @_;
     my @all_words = ();
 
-    if ($options{"-lang"}) {
-        my $key = $options{"-lang"};
-
-        if (!exists($sources{ $key })) {
+    if (!exists($sources{ $key })) {
             print color("yellow");
             print "Language $key could not be found!\n";
             print color("reset");
@@ -121,6 +124,10 @@ sub generate_words {
         }
  
         open(my $current_data, "<", "/home/john/scripts/aword/sources/$key\_words.csv") || die "Could not open file $key\_words.csv!";
+        
+        # Skip the first line
+        my $headers=<$current_data>;
+
         while (my $line = <$current_data>) {
             chomp $line;
 
@@ -131,6 +138,22 @@ sub generate_words {
                 "word" => $fields[0],
                 "translation" => $fields[1]
             })
+        }
+    return @all_words
+}
+
+sub generate_words {
+    my @all_words = ();
+
+    if ($options{"-lang"}) {
+        my $key = $options{"-lang"};
+
+        if (index($key, ",") != -1) {
+            foreach my $iKey (split(/\,/, $key)) {
+                push(@all_words, find_source($iKey))
+            }
+        } else {
+            push(@all_words, find_source($key))
         }
 
     } else {
@@ -175,6 +198,11 @@ sub ask_question {
     my $user_input = <STDIN>;
     chomp $user_input;
     
+    if (lc $user_input eq ".quit") {
+        setdown();
+        exit;
+    }
+
     $global_count++;
 
     if (lc $user_input eq lc $expected) {
@@ -196,18 +224,26 @@ sub parse_options {
 
     my $string_opts = join(" ", @ARGV);
 
+    my $prog_regex = qr/%(\w+)/;
+
     if (index($string_opts, "\@help") != -1 || index($string_opts, "-help") != -1) {
         print_help();
         exit;
     } elsif (index($string_opts, "\@stats") != -1) {
-        system("perl /home/john/scripts/aword/awordstats.pl");
+        system($^X, "/home/john/scripts/aword/awordstats.pl");
         exit;
-    } elsif (index($string_opts, "\@sources") != -1) {
-        system("perl /home/john/scripts/aword/awordsources.pl $string_opts");
+    } elsif (index($string_opts, "\@sources") != -1) {  
+        system($^X, "/home/john/scripts/aword/awordsources.pl", @ARGV);
+        exit;
+    } elsif (index($string_opts, "\@programs") != -1) {  
+        system($^X, "/home/john/scripts/aword/awordprograms.pl", @ARGV);
+        exit;
+    } elsif ($string_opts =~ /$prog_regex/) {
+        # system("aword", "\@programs", "run", $1);
+        system($^X, "/home/john/scripts/aword/awordprograms.pl", "\@programs", "run", $1);
         exit;
     }
     
-
     for my $arg (@ARGV) {
 
         if ($option_type eq "param_required") {

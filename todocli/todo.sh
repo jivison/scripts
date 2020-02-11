@@ -13,4 +13,4 @@ if [[ "$1" == "init" ]]; then
 else
     node /home/john/scripts/todocli/findTodorc.js
     node /home/john/scripts/todocli/index.js
-fi
+fis
