@@ -6,29 +6,28 @@ use LWP::Simple;
 use List::Util qw(shuffle);
 use Term::ANSIColor;
 
-my %sources = (
-    # Controlled by awordsources now
-    # "korean" => 'https://docs.google.com/spreadsheets/d/1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw/export?format=csv&id=1f0K1SQJ7ZcInRaMTs7ZWJ3i5l7i_HI2OzKQY9zbE4cw&gid=0'
-    );
+my %sources = ();
 
 my %options = (
     "-c" => 1,
     "update" => "false",
     "-prompt" => "random",
-    "-lang" => undef
+    "-lang" => undef,
+    "multichoice" => "false"
 );
 
 my @unnamed_options = (
     "update",
-    "uncolored"
+    "uncolored",
+    "multichoice"
 );
 
 my $colored = 1;
 my $global_count = 0;
 my $start_time = time;
 
-my $sources_path = "/home/john/scripts/aword/.aword_sources";
-my $history_path = "/home/john/scripts/aword/.aword_history";
+my $sources_path = "/Users/johnivison/clones/scripts-new/aword/.aword_sources";
+my $history_path = "/Users/johnivison/clones/scripts-new/aword/.aword_history";
 
 open(my $sources_raw, "<", $sources_path) or print("WARNING: sources file could not be opened (at $sources_path)");
 
@@ -86,13 +85,20 @@ Options:
     update                Forces an a redownload of all the sources.
     uncolored             Removes colour from the program
 
+    %<program name>       Runs the given program
+
 Commands:
 
     \@help,-help           Prints this screen
     \@stats                Prints some stats about your playtime
     \@sources              Source control    
-        add <alias> <url>       Adds a source to the list of sources. Must be csv format.
-        list                    List the current sources
+        add <alias> <url>           Adds a source to the list of sources
+        list                        List the current sources
+    \@programs             Programs control (allows you to run specific combinations of options with a single option)
+        add <alias> "<commands>"    Adds a program to the list of programs
+        list                        List the current programs
+        run <program>               Runs a given program (aliased to %<program>)       
+
 
 EOF
 
@@ -107,9 +113,41 @@ sub update_sources {
         
         my $source = $sources{$key};
         print "Downloading source '$key'\n";
-        die "A non 200 status code was returned!" unless getstore($source, "/home/john/scripts/aword/sources/$key\_words.csv") == 200;
+        my $status_code = getstore($source, "/Users/johnivison/clones/scripts-new/aword/sources/$key\_words.csv");
+
+        die "A non 200 status code was returned!" unless $status_code == 200;
     }
 
+}
+
+sub generate_multichoice {
+    my ($word_index, @words) = @_;
+
+    my $word = $words[$word_index];
+
+    my $lucky_letter = ('A'..'D')[rand 4];
+    my @word_prompts;
+    my @word_pool = @words[0..$word_index, $word_index + 1..scalar(@words)-1];
+
+    if ($options{"-prompt"} eq "random") {
+        @word_prompts = shuffle(("translation", "word"));
+    } elsif ($options{"-prompt"} eq "english") {
+        @word_prompts = ("translation", "word");
+    } else {
+        @word_prompts = ("word", "translation");
+    }
+
+    my $demand = $word->{$word_prompts[0]} . ":\n";
+
+    for my $letter ('A'..'D') {
+        if ($letter eq $lucky_letter) {
+            $demand .= "$letter) $word->{$word_prompts[1]}\n";
+        } else {
+            $demand .= "$letter) $word_pool[rand @word_pool]{$word_prompts[1]}\n";
+        }
+    }
+
+    return ($demand . "->", $lucky_letter);
 }
 
 sub find_source {
@@ -123,7 +161,7 @@ sub find_source {
             exit 130;
         }
  
-        open(my $current_data, "<", "/home/john/scripts/aword/sources/$key\_words.csv") || die "Could not open file $key\_words.csv!";
+        open(my $current_data, "<", "/Users/johnivison/clones/scripts-new/aword/sources/$key\_words.csv") || die "Could not open file $key\_words.csv!";
         
         # Skip the first line
         my $headers=<$current_data>;
@@ -158,7 +196,7 @@ sub generate_words {
 
     } else {
         foreach my $key (keys %sources) {
-            open(my $current_data, "<", "/home/john/scripts/aword/sources/$key\_words.csv") || die "Could not open file $key\_words.csv!";
+            open(my $current_data, "<", "/Users/johnivison/clones/scripts-new/aword/sources/$key\_words.csv") || die "Could not open file $key\_words.csv!";
             while (my $line = <$current_data>) {
                 chomp $line;
 
@@ -179,19 +217,24 @@ sub generate_words {
 sub ask_question {
     my @words = generate_words;
     
-    my $current_word = $words[rand @words];
+    my $rand_index = rand @words;
+    my $current_word = $words[$rand_index];
 
     my $translation = trim($current_word->{"translation"} =~ s/\"//r);
     my $source = trim($current_word->{"word"} =~ s/\"//r);
 
     my ($demand, $expected);
 
-    if ($options{"-prompt"} eq "random") {
-        ($demand, $expected) = shuffle(($translation, $source));
-    } elsif ($options{"-prompt"} eq "english") {
-        ($demand, $expected) = ($translation, $source);
+    if ($options{"multichoice"} eq "true") {
+        ($demand, $expected) = generate_multichoice($rand_index, @words);
     } else {
-        ($demand, $expected) = ($source, $translation);
+        if ($options{"-prompt"} eq "random") {
+            ($demand, $expected) = shuffle(($translation, $source));
+        } elsif ($options{"-prompt"} eq "english") {
+            ($demand, $expected) = ($translation, $source);
+        } else {
+            ($demand, $expected) = ($source, $translation);
+        }
     }
 
     print $current_word->{"language"} ."\t". $demand . ": ";
@@ -230,17 +273,17 @@ sub parse_options {
         print_help();
         exit;
     } elsif (index($string_opts, "\@stats") != -1) {
-        system($^X, "/home/john/scripts/aword/awordstats.pl");
+        system($^X, "/Users/johnivison/clones/scripts-new/aword/awordstats.pl");
         exit;
     } elsif (index($string_opts, "\@sources") != -1) {  
-        system($^X, "/home/john/scripts/aword/awordsources.pl", @ARGV);
+        system($^X, "/Users/johnivison/clones/scripts-new/aword/awordsources.pl", @ARGV);
         exit;
     } elsif (index($string_opts, "\@programs") != -1) {  
-        system($^X, "/home/john/scripts/aword/awordprograms.pl", @ARGV);
+        system($^X, "/Users/johnivison/clones/scripts-new/aword/awordprograms.pl", @ARGV);
         exit;
     } elsif ($string_opts =~ /$prog_regex/) {
         # system("aword", "\@programs", "run", $1);
-        system($^X, "/home/john/scripts/aword/awordprograms.pl", "\@programs", "run", $1);
+        system($^X, "/Users/johnivison/clones/scripts-new/aword/awordprograms.pl", "\@programs", "run", $1);
         exit;
     }
     
@@ -267,6 +310,7 @@ sub parse_options {
                 print color("reset");
             }
             if ($option_name eq "update") {$options{"update"} = "true" }
+            if ($option_name eq "multichoice") {$options{"multichoice"} = "true" }
             elsif ($option_name eq "uncolored") {$colored = 0}
         }
     }

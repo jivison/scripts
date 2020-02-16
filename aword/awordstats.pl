@@ -16,7 +16,7 @@ sub favourite_prompt {
     return $most_used
 }
 
-open(my $history, "<", "/home/john/scripts/aword/.aword_history") || die "Could not open history file!";
+open(my $history, "<", "/Users/johnivison/clones/scripts-new/aword/.aword_history") || die "Could not open history file!";
 while (my $line = <$history>) {
     chomp $line;
 

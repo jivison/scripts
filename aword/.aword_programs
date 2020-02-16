@@ -1,3 +1,4 @@
 name,command
 "chinese","-c endless -lang chinese -prompt english"
-"korean","-c endless -lang korean,korean2"
+"korean","-c endless -lang korean,korean2 -prompt english"
+"koreanmc","-c endless -lang korean,korean2 -prompt english multichoice"

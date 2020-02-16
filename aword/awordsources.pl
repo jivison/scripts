@@ -1,7 +1,7 @@
 use strict;
 use Term::ANSIColor;
 
-my $sources_path = "/home/john/scripts/aword/.aword_sources";
+my $sources_path = "/Users/johnivison/clones/scripts-new/aword/.aword_sources";
 
 my @opts = @ARGV;   
 

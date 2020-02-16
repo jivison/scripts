@@ -6,7 +6,7 @@ use Text::CSV;
 
 my $csv = Text::CSV->new({ sep_char => ',' });
 
-my $programs_path = "/home/john/scripts/aword/.aword_programs";
+my $programs_path = "/Users/johnivison/clones/scripts-new/aword/.aword_programs";
 
 my @opts = @ARGV;
 
