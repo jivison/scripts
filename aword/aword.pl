@@ -10,9 +10,10 @@ my %sources = ();
 
 my %options = (
     "-c" => 1,
-    "update" => "false",
     "-prompt" => "random",
     "-lang" => undef,
+    "-options-count" => 4,
+    "update" => "false",
     "multichoice" => "false"
 );
 
@@ -81,9 +82,11 @@ Options:
     -c <count>            The number of words the program asks you. Can be either a postive integer or "endless" (default: 1)
     -prompt <prompt>      The language that is prompted. Can be "random", "english", or "foreign". (default: "random")
     -lang <language[,lang2]>      Restricts aword to a single given language. Has to correspond with a source
+    -options-count <count>        The number of choices given (only applicable when run with multichoice) (default: 4)
 
     update                Forces an a redownload of all the sources.
     uncolored             Removes colour from the program
+    multichoice           Gives you multiple choice
 
     %<program name>       Runs the given program
 
@@ -125,7 +128,9 @@ sub generate_multichoice {
 
     my $word = $words[$word_index];
 
-    my $lucky_letter = ('A'..'D')[rand 4];
+    my @letters = ('A'..'Z')[0..$options{"-options-count"}-1];
+
+    my $lucky_letter = @letters [rand $options{"-options-count"}-1];
     my @word_prompts;
     my @word_pool = @words[0..$word_index, $word_index + 1..scalar(@words)-1];
 
@@ -139,7 +144,7 @@ sub generate_multichoice {
 
     my $demand = $word->{$word_prompts[0]} . ":\n";
 
-    for my $letter ('A'..'D') {
+    for my $letter (@letters) {
         if ($letter eq $lucky_letter) {
             $demand .= "$letter) $word->{$word_prompts[1]}\n";
         } else {
